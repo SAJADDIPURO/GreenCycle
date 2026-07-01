@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daftar — Bank Sampah Digital</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body style="display:flex; flex-direction:column; min-height:100vh;">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="../index.html" class="navbar-brand">
+      ♻ GreenCycle
+    </a>
+    <ul class="navbar-menu">
+      <li><a href="../index.html">Beranda</a></li>
+      <li><a href="login.html" class="btn btn-outline" style="padding:7px 16px;">Masuk</a></li>
+    </ul>
+  </nav>
+
+  <!-- FORM REGISTER -->
+  <div style="flex:1; display:flex; align-items:center; justify-content:center; padding: 40px 20px;">
+    <div style="width: 100%; max-width: 440px;">
+
+      <div style="text-align:center; margin-bottom: 28px;">
+        <div style="font-size: 40px; margin-bottom: 8px;"></div>
+        <h1 style="font-size: 22px; font-weight: 700; margin-bottom: 6px;">Buat akun baru</h1>
+        <p style="color: #6B7280; font-size: 14px;">Sudah punya akun? <a href="login.html">Masuk di sini</a></p>
+      </div>
+
+      <div class="kartu">
+        <div id="alert-box"></div>
+
+        <div class="form-group">
+          <label for="nama">Nama lengkap</label>
+          <input type="text" id="nama" placeholder="Nama kamu" />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="contoh@email.com" />
+        </div>
+
+        <div class="form-group">
+          <label for="kelurahan">Kelurahan</label>
+          <select id="kelurahan">
+            <option value="">-- Pilih kelurahan --</option>
+            <option>Bukit Lama</option>
+            <option>Bukit Baru</option>
+            <option>Demang Lebar Daun</option>
+            <option>Ilir Barat I</option>
+            <option>Ilir Barat II</option>
+            <option>Ilir Timur I</option>
+            <option>Ilir Timur II</option>
+            <option>Ilir Timur III</option>
+            <option>Kalidoni</option>
+            <option>Kemuning</option>
+            <option>Kertapati</option>
+            <option>Plaju</option>
+            <option>Seberang Ulu I</option>
+            <option>Seberang Ulu II</option>
+            <option>Sematang Borang</option>
+            <option>Sukarami</option>
+            <option>Lainnya</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Minimal 6 karakter" />
+          <div class="form-hint">Minimal 6 karakter</div>
+        </div>
+
+        <div class="form-group">
+          <label for="konfirmasi">Konfirmasi password</label>
+          <input type="password" id="konfirmasi" placeholder="Ulangi password" />
+        </div>
+
+        <button class="btn btn-hijau btn-block btn-lg" id="btn-daftar" onclick="daftar()" style="margin-top: 4px;">
+          Buat Akun
+        </button>
+
+        <p style="text-align:center; font-size: 12px; color: #9CA3AF; margin-top: 16px; line-height: 1.5;">
+          Dengan mendaftar, kamu setuju berkontribusi menjaga lingkungan bersama. 
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer style="text-align:center; padding: 16px; font-size: 13px; color: #6B7280;">
+    © 2025 Bank Sampah Digital — Palembang
+  </footer>
+
+  <script type="module">
+    import { supabase } from '../js/supabase.js'
+
+    // Kalau sudah login, redirect ke dashboard
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) window.location.href = 'dashboard.html'
+
+    function tampilAlert(pesan, tipe = 'error') {
+      const box = document.getElementById('alert-box')
+      box.innerHTML = `<div class="alert alert-${tipe === 'error' ? 'error' : 'sukses'}">${pesan}</div>`
+      box.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
+
+    window.daftar = async function () {
+      const nama       = document.getElementById('nama').value.trim()
+      const email      = document.getElementById('email').value.trim()
+      const kelurahan  = document.getElementById('kelurahan').value
+      const password   = document.getElementById('password').value
+      const konfirmasi = document.getElementById('konfirmasi').value
+      const btn        = document.getElementById('btn-daftar')
+
+      // Validasi
+      if (!nama || !email || !kelurahan || !password || !konfirmasi) {
+        tampilAlert('Semua field wajib diisi.')
+        return
+      }
+      if (password.length < 6) {
+        tampilAlert('Password minimal 6 karakter.')
+        return
+      }
+      if (password !== konfirmasi) {
+        tampilAlert('Password dan konfirmasi tidak cocok.')
+        return
+      }
+
+      btn.disabled = true
+      btn.innerHTML = '<div class="spinner"></div> Membuat akun...'
+
+      // 1. Daftarkan ke Supabase Auth
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { nama } }
+      })
+
+      if (error) {
+        tampilAlert('Gagal mendaftar: ' + error.message)
+        btn.disabled = false
+        btn.innerHTML = 'Buat Akun'
+        return
+      }
+
+      // 2. Simpan data tambahan ke tabel profiles
+      if (data.user) {
+        await supabase.from('profiles').insert({
+          id: data.user.id,
+          nama,
+          email,
+          kelurahan,
+          total_poin: 0
+        })
+      }
+
+      tampilAlert('Akun berhasil dibuat! Silakan cek email untuk verifikasi, lalu login.', 'sukses')
+      btn.innerHTML = 'Akun Dibuat ✓'
+
+      setTimeout(() => window.location.href = 'login.html', 3000)
+    }
+
+    // Enter key submit
+    document.getElementById('konfirmasi').addEventListener('keydown', e => {
+      if (e.key === 'Enter') window.daftar()
+    })
+  </script>
+
+</body>
+</html>

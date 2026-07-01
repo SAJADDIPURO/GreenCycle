@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Masuk — Bank Sampah Digital</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body style="display:flex; flex-direction:column; min-height:100vh;">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="../index.html" class="navbar-brand">
+      ♻ GreenCycle
+    </a>
+    <ul class="navbar-menu">
+      <li><a href="../index.html">Beranda</a></li>
+      <li><a href="register.html" class="btn btn-hijau" style="padding:7px 16px;">Daftar</a></li>
+    </ul>
+  </nav>
+
+  <!-- FORM LOGIN -->
+  <div style="flex:1; display:flex; align-items:center; justify-content:center; padding: 40px 20px;">
+    <div style="width: 100%; max-width: 420px;">
+
+      <div style="text-align:center; margin-bottom: 28px;">
+        <div style="font-size: 40px; margin-bottom: 8px;">♻</div>
+        <h1 style="font-size: 22px; font-weight: 700; margin-bottom: 6px;">Masuk ke akun kamu</h1>
+        <p style="color: #6B7280; font-size: 14px;">Belum punya akun? <a href="register.html">Daftar gratis</a></p>
+      </div>
+
+      <div class="kartu">
+        <div id="alert-box"></div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="contoh@email.com" />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Masukkan password" />
+        </div>
+
+        <div style="text-align:right; margin-bottom: 20px;">
+          <a href="#" style="font-size: 13px; color: #6B7280;">Lupa password?</a>
+        </div>
+
+        <button class="btn btn-hijau btn-block btn-lg" id="btn-login" onclick="login()">
+          Masuk
+        </button>
+
+        <div style="text-align:center; margin-top: 16px; font-size: 13px; color: #6B7280;">
+          atau
+        </div>
+
+        <button class="btn btn-outline btn-block" style="margin-top: 12px;" onclick="loginGoogle()">
+          <img src="https://www.google.com/favicon.ico" style="width:16px;height:16px;" alt="Google" />
+          Masuk dengan Google
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer style="text-align:center; padding: 16px; font-size: 13px; color: #6B7280;">
+    © 2025 Bank Sampah Digital — Palembang
+  </footer>
+
+  <script type="module">
+    import { supabase } from '../js/supabase.js'
+
+    // Cek kalau sudah login, langsung redirect ke dashboard
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) window.location.href = 'dashboard.html'
+
+    function tampilAlert(pesan, tipe = 'error') {
+      const box = document.getElementById('alert-box')
+      box.innerHTML = `<div class="alert alert-${tipe === 'error' ? 'error' : 'sukses'}">${pesan}</div>`
+    }
+
+    window.login = async function () {
+  const email    = document.getElementById('email').value.trim()
+  const password = document.getElementById('password').value
+  const btn      = document.getElementById('btn-login')
+
+  if (!email || !password) {
+    tampilAlert('Email dan password wajib diisi.')
+    return
+  }
+
+  btn.disabled = true
+  btn.innerHTML = '<div class="spinner"></div> Memproses...'
+
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+
+  if (error) {
+    tampilAlert('Email atau password salah. Coba lagi.')
+    btn.disabled = false
+    btn.innerHTML = 'Masuk'
+    return
+  }
+
+  // Cek role dari profiles
+  const { data: profil, error: errProfil } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', data.user.id)
+    .single()
+
+  console.log('User ID:', data.user.id)
+  console.log('Profil:', profil)
+  console.log('Error profil:', errProfil)
+
+  tampilAlert('Berhasil masuk! Mengalihkan...', 'sukses')
+
+  setTimeout(() => {
+    if (profil?.role === 'admin') {
+      window.location.href = 'admin.html'
+    } else {
+      window.location.href = 'dashboard.html'
+    }
+  }, 1000)
+}
+
+    window.loginGoogle = async function () {
+      await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + '/pages/dashboard.html' }
+      })
+    }
+
+    // Enter key untuk submit
+    document.getElementById('password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') window.login()
+    })
+  </script>
+
+</body>
+</html>

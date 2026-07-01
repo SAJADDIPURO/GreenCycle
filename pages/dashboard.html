@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Bank Sampah Digital</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="../index.html" class="navbar-brand">
+      ♻ GreenCycle
+    </a>
+    <ul class="navbar-menu">
+      <li><a href="dashboard.html" class="aktif">Dashboard</a></li>
+      <li><a href="setor.html">Setor Sampah</a></li>
+      <li><a href="leaderboard.html">Leaderboard</a></li>
+      <li>
+        <button class="btn btn-outline" style="padding:7px 16px;" onclick="logout()">
+          Keluar
+        </button>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- KONTEN -->
+  <div class="halaman">
+
+    <!-- GREETING -->
+    <div style="margin-bottom: 24px;">
+      <h1 style="font-size: 22px; font-weight: 700;" id="greeting">Selamat datang! </h1>
+      <p style="color: #6B7280; font-size: 14px;" id="sub-greeting">Kelurahan —</p>
+    </div>
+
+    <!-- KARTU POIN UTAMA -->
+    <div class="kartu-poin">
+      <div>
+        <div class="label-poin">Total poin kamu</div>
+        <div class="jumlah-poin" id="jumlah-poin">0 <span style="font-size:20px;opacity:.7">poin</span></div>
+        <div class="sub-poin" id="sub-poin">≈ Rp 0 · Setoran ke-0</div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
+        <div id="badge-streak" style="background:rgba(255,255,255,0.2); border-radius:20px; padding:6px 14px; font-size:13px; color:white; display:none;">
+           Streak aktif!
+        </div>
+        <a href="setor.html" class="btn" style="background:white; color:var(--hijau-gelap); font-weight:600;">
+          + Setor Sampah
+        </a>
+      </div>
+    </div>
+
+    <!-- STATISTIK -->
+    <div class="grid-statistik">
+      <div class="kartu-statistik">
+        <div class="label">Total sampah</div>
+        <div class="angka" id="stat-sampah">0</div>
+        <div class="satuan">kg</div>
+      </div>
+      <div class="kartu-statistik">
+        <div class="label">Setoran disetujui</div>
+        <div class="angka" id="stat-disetujui">0</div>
+        <div class="satuan">laporan</div>
+      </div>
+      <div class="kartu-statistik">
+        <div class="label">Menunggu verifikasi</div>
+        <div class="angka" id="stat-menunggu">0</div>
+        <div class="satuan">laporan</div>
+      </div>
+      <div class="kartu-statistik">
+        <div class="label">Peringkat kamu</div>
+        <div class="angka" id="stat-rank">#—</div>
+        <div class="satuan">di kelurahan</div>
+      </div>
+    </div>
+
+    <!-- BADGE / PENCAPAIAN -->
+    <h2 class="section-title">Pencapaian</h2>
+    <div id="badge-area" style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:28px;">
+      <div class="loading-center"><div class="spinner"></div></div>
+    </div>
+
+    <!-- RIWAYAT SETORAN -->
+    <h2 class="section-title">Riwayat Setoran</h2>
+    <div class="kartu" style="padding:0; overflow:hidden;">
+      <div class="tabel-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>Jenis</th>
+              <th>Berat</th>
+              <th>Poin</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tabel-riwayat">
+            <tr>
+              <td colspan="5" style="text-align:center; padding:32px;">
+                <div class="spinner"></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TOMBOL SETOR BARU -->
+    <div style="text-align:center; margin-top: 28px;">
+      <a href="setor.html" class="btn btn-hijau btn-lg">
+        ♻ Laporkan Setoran Baru
+      </a>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer style="background: var(--hijau-gelap); color:white; text-align:center; padding:20px; margin-top:40px; font-size:13px; opacity:.9;">
+    © 2025 Bank Sampah Digital — Palembang 
+  </footer>
+
+  <script type="module">
+    import { supabase } from '../js/supabase.js'
+
+    // --- Cek auth ---
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      window.location.href = 'login.html'
+    }
+
+    // --- Muat profil warga ---
+    async function muatProfil() {
+      const { data: profil } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      if (!profil) return
+
+      document.getElementById('greeting').textContent =
+        `Selamat datang, ${profil.nama || 'Warga'}! 👋`
+      document.getElementById('sub-greeting').textContent =
+        `Kelurahan ${profil.kelurahan || '—'}`
+
+      document.getElementById('jumlah-poin').innerHTML =
+        `${(profil.total_poin || 0).toLocaleString('id-ID')} <span style="font-size:20px;opacity:.7">poin</span>`
+    }
+
+    // --- Muat statistik setoran ---
+    async function muatStatistik() {
+      const { data: semua } = await supabase
+        .from('setoran')
+        .select('*')
+        .eq('user_id', user.id)
+
+      if (!semua) return
+
+      const disetujui  = semua.filter(s => s.status === 'disetujui')
+      const menunggu   = semua.filter(s => s.status === 'menunggu')
+      const totalBerat = disetujui.reduce((sum, s) => sum + (s.berat_kg || 0), 0)
+      const totalPoin  = disetujui.reduce((sum, s) => sum + (s.poin || 0), 0)
+
+      document.getElementById('stat-sampah').textContent    = totalBerat.toFixed(1)
+      document.getElementById('stat-disetujui').textContent = disetujui.length
+      document.getElementById('stat-menunggu').textContent  = menunggu.length
+      document.getElementById('sub-poin').textContent =
+        `≈ Rp ${(totalPoin * 10).toLocaleString('id-ID')} · Setoran ke-${disetujui.length}`
+
+      // Streak badge (kalau ada setoran bulan ini)
+      const bulanIni = new Date()
+      bulanIni.setDate(1)
+      const adaBulanIni = disetujui.some(s => new Date(s.created_at) >= bulanIni)
+      if (adaBulanIni) {
+        document.getElementById('badge-streak').style.display = 'block'
+      }
+
+      // Muat badge pencapaian
+      muatBadge(disetujui.length, totalBerat, totalPoin)
+
+      // Muat riwayat tabel
+      muatRiwayat(semua)
+
+      // Ambil peringkat
+      muatPeringkat(totalPoin)
+    }
+
+    // --- Badge / pencapaian ---
+    function muatBadge(jumlahSetoran, totalBerat, totalPoin) {
+      const area = document.getElementById('badge-area')
+      const badges = []
+
+      const daftarBadge = [
+        { icon: '', nama: 'Pemula',       syarat: jumlahSetoran >= 1,   ket: 'Setoran pertama'        },
+        { icon: '',  nama: 'Aktif',        syarat: jumlahSetoran >= 5,   ket: '5 kali setoran'         },
+        { icon: '',  nama: 'Rajin',        syarat: jumlahSetoran >= 10,  ket: '10 kali setoran'        },
+        { icon: '',  nama: 'Pahlawan',     syarat: jumlahSetoran >= 25,  ket: '25 kali setoran'        },
+        { icon: '',  nama: '10 kg',        syarat: totalBerat  >= 10,    ket: 'Kumpulkan 10 kg sampah' },
+        { icon: '',  nama: '50 kg',        syarat: totalBerat  >= 50,    ket: 'Kumpulkan 50 kg sampah' },
+        { icon: '',  nama: '1.000 poin',   syarat: totalPoin   >= 1000,  ket: 'Raih 1.000 poin'       },
+        { icon: '',  nama: '5.000 poin',   syarat: totalPoin   >= 5000,  ket: 'Raih 5.000 poin'       },
+      ]
+
+      area.innerHTML = daftarBadge.map(b => `
+        <div style="
+          display:flex; align-items:center; gap:10px;
+          background: ${b.syarat ? 'var(--hijau-muda)' : '#F3F4F6'};
+          border: 1.5px solid ${b.syarat ? 'var(--hijau-border)' : '#E5E7EB'};
+          border-radius: 12px; padding: 10px 16px;
+          opacity: ${b.syarat ? '1' : '0.5'};
+        ">
+          <span style="font-size:22px;">${b.icon}</span>
+          <div>
+            <div style="font-weight:600; font-size:13px; color:${b.syarat ? 'var(--hijau-gelap)' : '#6B7280'};">
+              ${b.nama} ${b.syarat ? '' : '🔒'}
+            </div>
+            <div style="font-size:11px; color:#9CA3AF;">${b.ket}</div>
+          </div>
+        </div>
+      `).join('')
+    }
+
+    // --- Riwayat setoran ---
+    function muatRiwayat(data) {
+      const tbody = document.getElementById('tabel-riwayat')
+
+      if (!data.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align:center; padding:32px; color:#6B7280;">
+              Belum ada setoran. <a href="setor.html">Setor pertamamu sekarang!</a>
+            </td>
+          </tr>`
+        return
+      }
+
+      const sorted = [...data].sort((a, b) =>
+        new Date(b.created_at) - new Date(a.created_at)
+      )
+
+      const statusBadge = {
+        'menunggu'  : '<span class="badge badge-kuning">Menunggu</span>',
+        'disetujui' : '<span class="badge badge-hijau">Disetujui ✓</span>',
+        'ditolak'   : '<span class="badge badge-merah">Ditolak</span>',
+      }
+
+      tbody.innerHTML = sorted.map(s => `
+        <tr>
+          <td style="color:#6B7280; font-size:13px;">
+            ${new Date(s.created_at).toLocaleDateString('id-ID', {
+              day:'numeric', month:'short', year:'numeric'
+            })}
+          </td>
+          <td style="font-weight:500; text-transform:capitalize;">${s.jenis || '—'}</td>
+          <td>${s.berat_kg || 0} kg</td>
+          <td style="font-weight:600; color:var(--hijau-utama);">
+            ${s.status === 'disetujui' ? '+' + (s.poin || 0) : '—'}
+          </td>
+          <td>${statusBadge[s.status] || '<span class="badge badge-abu">—</span>'}</td>
+        </tr>
+      `).join('')
+    }
+
+    // --- Peringkat warga ---
+    async function muatPeringkat(poinSaya) {
+      const { data } = await supabase
+        .from('profiles')
+        .select('total_poin')
+        .order('total_poin', { ascending: false })
+
+      if (!data) return
+
+      const rank = data.findIndex(p => p.total_poin <= poinSaya) + 1
+      document.getElementById('stat-rank').textContent = `#${rank || data.length}`
+    }
+
+    // --- Logout ---
+    window.logout = async function () {
+      await supabase.auth.signOut()
+      window.location.href = '../index.html'
+    }
+
+    // Jalankan semua
+    muatProfil()
+    muatStatistik()
+  </script>
+
+</body>
+</html>

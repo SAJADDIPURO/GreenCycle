@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GreenCycle</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      ♻ GreenCycle
+    </a>
+    <ul class="navbar-menu">
+      <li><a href="index.html" class="aktif">Beranda</a></li>
+      <li><a href="pages/leaderboard.html">Leaderboard</a></li>
+      <li><a href="pages/login.html">Masuk</a></li>
+      <li><a href="pages/register.html" class="btn btn-hijau" style="padding:7px 16px;">Daftar</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <h1>Sampahmu Bernilai, <br>Lingkungan Bersih!</h1>
+    <p>Setor sampah daur ulang, kumpulkan poin, dan tukarkan dengan hadiah menarik. Bersama kita jaga lingkungan kita.</p>
+    <a href="pages/register.html" class="btn btn-hijau btn-lg">Mulai Sekarang →</a>
+  </section>
+
+  <!-- TUJUAN GREEN CYCLE -->
+  <section class="halaman">
+    <div class="kartu" style="background: #F0FBF3; border: 1px solid #C9E7D3; margin-bottom: 40px;">
+      <h2 class="section-title">Tujuan GreenCycle</h2>
+      <p style="font-size: 16px; line-height: 1.8; color: #2F4F33; margin-top: 12px;">
+        GreenCycle bertujuan untuk memudahkan masyarakat dalam mengelola dan mendaur ulang sampah melalui teknologi digital. Dengan sistem yang praktis dan mudah digunakan, pengguna dapat mencatat setoran sampah, memantau tabungan, dan melihat hasil pengelolaan sampah secara transparan. GreenCycle juga mendorong masyarakat untuk lebih peduli terhadap lingkungan dengan membiasakan pemilahan dan daur ulang sampah, sehingga dapat membantu menciptakan lingkungan yang lebih bersih, sehat, dan berkelanjutan.
+      </p>
+    </div>
+
+    <!-- STATISTIK PLATFORM -->
+    <h2 class="section-title">Dampak Bersama</h2>
+    <div class="grid-statistik">
+      <div class="kartu-statistik">
+        <div class="label">Total warga aktif</div>
+        <div class="angka" id="total-warga">0</div>
+        <div class="satuan">warga</div>
+      </div>
+      <div class="kartu-statistik">
+        <div class="label">Sampah terkumpul</div>
+        <div class="angka" id="total-sampah">0</div>
+        <div class="satuan">kg</div>
+      </div>
+      <div class="kartu-statistik">
+        <div class="label">Total setoran</div>
+        <div class="angka" id="total-setoran">0</div>
+        <div class="satuan">laporan</div>
+      </div>
+      <div class="kartu-statistik">
+        <div class="label">Poin dibagikan</div>
+        <div class="angka" id="total-poin">0</div>
+        <div class="satuan">poin</div>
+      </div>
+    </div>
+
+    <!-- CARA KERJA -->
+    <h2 class="section-title" style="margin-top: 40px;">Cara Kerja</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 40px;">
+      <div class="kartu" style="text-align:center;">
+        <div style="font-size: 36px; margin-bottom: 12px;"></div>
+        <div style="font-weight: 700; margin-bottom: 6px;">1. Daftar</div>
+        <div style="font-size: 14px; color: #6B7280;">Buat akun gratis dengan email dan data kelurahan kamu.</div>
+      </div>
+      <div class="kartu" style="text-align:center;">
+        <div style="font-size: 36px; margin-bottom: 12px;"></div>
+        <div style="font-weight: 700; margin-bottom: 6px;">2. Setor Sampah</div>
+        <div style="font-size: 14px; color: #6B7280;">Foto sampah, pilih jenisnya, dan kirim laporan ke bank sampah.</div>
+      </div>
+      <div class="kartu" style="text-align:center;">
+        <div style="font-size: 36px; margin-bottom: 12px;"></div>
+        <div style="font-weight: 700; margin-bottom: 6px;">3. Diverifikasi</div>
+        <div style="font-size: 14px; color: #6B7280;">Admin bank sampah mengkonfirmasi berat dan jenis sampahmu.</div>
+      </div>
+      <div class="kartu" style="text-align:center;">
+        <div style="font-size: 36px; margin-bottom: 12px;"></div>
+        <div style="font-weight: 700; margin-bottom: 6px;">4. Tukar Hadiah</div>
+        <div style="font-size: 14px; color: #6B7280;">Kumpulkan poin dan tukar dengan uang atau hadiah menarik.</div>
+      </div>
+    </div>
+
+    <!-- JENIS SAMPAH & POIN -->
+    <h2 class="section-title">Jenis Sampah & Poin</h2>
+    <div class="kartu" style="margin-bottom: 40px;">
+      <div class="tabel-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Jenis Sampah</th>
+              <th>Poin per kg</th>
+              <th>Estimasi nilai</th>
+            </tr>
+          </thead>
+          <tbody id="tabel-jenis">
+            <tr>
+              <td colspan="3" style="text-align:center; color:#6B7280; padding: 24px;">
+                <div class="spinner"></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- LEADERBOARD MINI -->
+    <h2 class="section-title">Top 5 Warga Terbaik</h2>
+    <div id="leaderboard-mini" style="margin-bottom: 40px;">
+      <div class="loading-center"><div class="spinner"></div></div>
+    </div>
+    <div style="text-align:center; margin-bottom: 40px;">
+      <a href="pages/leaderboard.html" class="btn btn-outline">Lihat semua peringkat →</a>
+    </div>
+
+    <!-- CTA BAWAH -->
+    <div class="kartu" style="text-align:center; background: var(--hijau-muda); border-color: var(--hijau-border);">
+      <div style="font-size: 32px; margin-bottom: 12px;"></div>
+      <h3 style="font-size: 20px; margin-bottom: 8px;">Siap berkontribusi?</h3>
+      <p style="color: #6B7280; margin-bottom: 20px; font-size: 15px;">Bergabung bersama warga Palembang yang sudah peduli lingkungan.</p>
+      <a href="pages/register.html" class="btn btn-hijau btn-lg">Daftar Gratis Sekarang</a>
+    </div>
+
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="background: var(--hijau-gelap); color: white; text-align: center; padding: 24px; margin-top: 40px; font-size: 14px; opacity: 0.9;">
+    © 2025 Bank Sampah Digital — Palembang 
+  </footer>
+
+  <!-- SCRIPT -->
+  <script type="module">
+    import { supabase } from './js/supabase.js'
+
+    // --- Ambil statistik platform ---
+    async function muatStatistik() {
+      const { count: jumlahWarga } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+
+      const { data: setoranData } = await supabase
+        .from('setoran')
+        .select('berat_kg, poin')
+        .eq('status', 'disetujui')
+
+      const totalSampah = setoranData?.reduce((sum, s) => sum + (s.berat_kg || 0), 0) || 0
+      const totalPoin   = setoranData?.reduce((sum, s) => sum + (s.poin || 0), 0) || 0
+
+      animasiAngka('total-warga',   jumlahWarga || 0)
+      animasiAngka('total-sampah',  Math.round(totalSampah))
+      animasiAngka('total-setoran', setoranData?.length || 0)
+      animasiAngka('total-poin',    totalPoin)
+    }
+
+    // --- Animasi angka naik ---
+    function animasiAngka(id, target) {
+      const el = document.getElementById(id)
+      if (!el) return
+      let current = 0
+      const step = Math.max(1, Math.floor(target / 40))
+      const interval = setInterval(() => {
+        current = Math.min(current + step, target)
+        el.textContent = current.toLocaleString('id-ID')
+        if (current >= target) clearInterval(interval)
+      }, 30)
+    }
+
+    // --- Muat tabel jenis sampah ---
+    async function muatJenisSampah() {
+      const { data, error } = await supabase
+        .from('jenis_sampah')
+        .select('*')
+        .order('poin_per_kg', { ascending: false })
+
+      const tbody = document.getElementById('tabel-jenis')
+
+      if (error || !data?.length) {
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:#6B7280;padding:20px;">Data belum tersedia</td></tr>`
+        return
+      }
+
+      tbody.innerHTML = data.map(j => `
+        <tr>
+          <td>
+            <span style="font-weight:500;">${j.nama}</span>
+          </td>
+          <td>
+            <span class="badge badge-hijau">${j.poin_per_kg} poin</span>
+          </td>
+          <td style="color:#6B7280;">
+            ≈ Rp ${(j.poin_per_kg * 10).toLocaleString('id-ID')} / kg
+          </td>
+        </tr>
+      `).join('')
+    }
+
+    // --- Muat leaderboard mini ---
+    async function muatLeaderboard() {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('nama, kelurahan, total_poin')
+        .order('total_poin', { ascending: false })
+        .limit(5)
+
+      const container = document.getElementById('leaderboard-mini')
+
+      if (error || !data?.length) {
+        container.innerHTML = `<div style="text-align:center;color:#6B7280;padding:20px;">Belum ada data peringkat</div>`
+        return
+      }
+
+      const medali = ['🥇', '🥈', '🥉', '4', '5']
+      const rankClass = ['emas', 'perak', 'perunggu', '', '']
+
+      container.innerHTML = data.map((w, i) => `
+        <div class="leaderboard-item">
+          <div class="lb-rank ${rankClass[i]}">${medali[i]}</div>
+          <div class="lb-avatar">${w.nama ? w.nama[0].toUpperCase() : '?'}</div>
+          <div>
+            <div class="lb-nama">${w.nama || 'Warga'}</div>
+            <div class="lb-kelurahan">${w.kelurahan || '-'}</div>
+          </div>
+          <div class="lb-poin">${(w.total_poin || 0).toLocaleString('id-ID')} pts</div>
+        </div>
+      `).join('')
+    }
+
+    // Jalankan semua
+    muatStatistik()
+    muatJenisSampah()
+    muatLeaderboard()
+  </script>
+
+</body>
+</html>
